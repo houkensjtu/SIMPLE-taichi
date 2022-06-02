@@ -235,51 +235,8 @@ class SIMPLESolver:
         self.p_correction_solver = CGSolver(self.coef_p, self.b_p, self.pcor)
         momentum_residual = 0.0
         continuity_residual = 0.0
-
-        ## Time marching
-        for t in range(1):
-            ## Matplotlib live plotting
-            import numpy as np
-            import matplotlib.pyplot as plt
-            #plt.style.use('_mpl-gallery-nogrid')
-            plt.ion()
-            fig, ax = plt.subplots(2,3, figsize=(12,6))
-            x = []
-            y1 = []
-            y2 = []
-            line1, = ax[0][0].plot(x,y1)
-            line2, = ax[1][0].plot(x,y2)
-            ax[0][0].set_xlabel('Iteration')
-            ax[0][0].set_ylabel('Momentum residual')
-            ax[1][0].set_xlabel('Iteration')
-            ax[1][0].set_ylabel('Continuity residual')                                    
-            ax[0][0].grid()
-            ax[1][0].grid()
-            
-            ugraph = ax[0][2].imshow(self.u.to_numpy())
-            ax[0][2].set_xlabel('U Velocity')
-            vgraph = ax[1][2].imshow(self.v.to_numpy())
-            ax[1][2].set_xlabel('V Velocity')
-
-            y_ref, u_ref = np.loadtxt('data/ghia1982.dat', unpack=True, skiprows=2, usecols=(0, 1))
-            ax[0][1].plot(y_ref, u_ref, 'cs', label='Ghia et al. 1982') # Compare with Ghia's reference data
-            u_xcor = np.linspace(0.01, 0.99, 50)
-            u_ycor = self.u.to_numpy()[26, 1:51]
-            uprof, = ax[0][1].plot(u_xcor, u_ycor, label='Current u profile')
-            ax[0][1].set_xlabel('U velocity profile at x = 0.5')
-            ax[0][1].grid()
-            ax[0][1].legend()            
-            
-            x_ref, v_ref = np.loadtxt('data/ghia1982.dat', unpack=True, skiprows=2, usecols=(6, 7))
-            ax[1][1].plot(x_ref, v_ref, 'cs', label='Ghia et al. 1982') # Compare with Ghia's reference data
-            v_xcor = np.linspace(0.01, 0.99, 50)
-            v_ycor = self.v.to_numpy()[1:51, 26]
-            vprof, = ax[1][1].plot(v_xcor, v_ycor, label='Current v profile')
-            ax[1][1].set_xlabel('V velocity profile at y = 0.5')            
-            ax[1][1].grid()
-            ax[1][1].legend()
-            plt.tight_layout()
-            
+        for t in range(1):  ## Time marching
+            self.disp.matplt_display_init()
             ## Internal iteration
             for substep in range(10000):
                 ## SIMPLE algorithm
@@ -300,37 +257,15 @@ class SIMPLESolver:
                     print('>>> Solution converged.')
                     break
                 #self.dump_coef(substep, 'momfin')
-
-                ## Update live plotting
-                x.append(substep)
-                y1.append(momentum_residual)
-                y2.append(continuity_residual)
-                line1.set_xdata(x)
-                line1.set_ydata(y1)
-                line2.set_xdata(x)                                
-                line2.set_ydata(y2)
-                ax[0][0].relim()
-                ax[0][0].autoscale_view()
-                ax[1][0].relim()
-                ax[1][0].autoscale_view()
+                self.disp.matplt_display_update(substep, momentum_residual, continuity_residual)
                 
-                ugraph.set_data(np.flip(np.flip(self.u.to_numpy().transpose()), axis=1))
-                ugraph.autoscale()                
-                vgraph.set_data(np.flip(np.flip(self.v.to_numpy().transpose()), axis=1))
-                vgraph.autoscale()
-
-                uprof.set_ydata(self.u.to_numpy()[26,1:51])
-                vprof.set_ydata(self.v.to_numpy()[1:51,26])                
-
-                fig.canvas.draw()
-                fig.canvas.flush_events()
 
 # Lid-driven Cavity Setup
 ssolver = SIMPLESolver(1.0, 1.0, 50, 50) # lx, ly, nx, ny
 
 # Boundary conditions
 # ssolver.bc['w'][0] = 1.0    # West Normal velocity               
-#ssolver.bc['w'][1] = 1.0    # West Tangential velocity
+# ssolver.bc['w'][1] = 1.0    # West Tangential velocity
 
 # ssolver.bc['e'][0] = 1.0    # East Normal velocity
 # ssolver.bc['e'][1] = 0.0    # East Tangential velocity

@@ -53,7 +53,69 @@ class Display:
             self.gui.show(filename)
 
     def matplt_display_init(self):
-        pass
+        ## Matplotlib live plotting
+        import numpy as np
+        import matplotlib.pyplot as plt
+        plt.ion()
+        self.fig, self.ax = plt.subplots(2,3, figsize=(12,6))
+        self.x = []
+        self.y1 = []
+        self.y2 = []
+        self.line1, = self.ax[0][0].plot(self.x, self.y1)
+        self.line2, = self.ax[1][0].plot(self.x, self.y2)
+        self.ax[0][0].set_xlabel('Iteration')
+        self.ax[0][0].set_ylabel('Momentum residual')
+        self.ax[1][0].set_xlabel('Iteration')
+        self.ax[1][0].set_ylabel('Continuity residual')                                    
+        self.ax[0][0].grid()
+        self.ax[1][0].grid()
+            
+        self.ugraph = self.ax[0][2].imshow(self.solver.u.to_numpy())
+        self.ax[0][2].set_xlabel('U Velocity')
+        self.vgraph = self.ax[1][2].imshow(self.solver.v.to_numpy())
+        self.ax[1][2].set_xlabel('V Velocity')
+
+        y_ref, u_ref = np.loadtxt('data/ghia1982.dat', unpack=True, skiprows=2, usecols=(0, 1))
+        self.ax[0][1].plot(y_ref, u_ref, 'cs', label='Ghia et al. 1982') # Compare with Ghia's reference data
+        self.u_xcor = np.linspace(0.01, 0.99, 50)
+        self.u_ycor = self.solver.u.to_numpy()[26, 1:51]
+        self.uprof, = self.ax[0][1].plot(self.u_xcor, self.u_ycor, label='Current u profile')
+        self.ax[0][1].set_xlabel('U velocity profile at x = 0.5')
+        self.ax[0][1].grid()
+        self.ax[0][1].legend()            
+            
+        x_ref, v_ref = np.loadtxt('data/ghia1982.dat', unpack=True, skiprows=2, usecols=(6, 7))
+        self.ax[1][1].plot(x_ref, v_ref, 'cs', label='Ghia et al. 1982') # Compare with Ghia's reference data
+        self.v_xcor = np.linspace(0.01, 0.99, 50)
+        self.v_ycor = self.solver.v.to_numpy()[1:51, 26]
+        self.vprof, = self.ax[1][1].plot(self.v_xcor, self.v_ycor, label='Current v profile')
+        self.ax[1][1].set_xlabel('V velocity profile at y = 0.5')            
+        self.ax[1][1].grid()
+        self.ax[1][1].legend()
+        plt.tight_layout()
+
+    def matplt_display_update(self, substep, momentum_residual, continuity_residual):
+        ## Update live plotting
+        self.x.append(substep)
+        self.y1.append(momentum_residual)
+        self.y2.append(continuity_residual)
+        self.line1.set_xdata(self.x)
+        self.line1.set_ydata(self.y1)
+        self.line2.set_xdata(self.x)    
+        self.line2.set_ydata(self.y2)
+        self.ax[0][0].relim()
+        self.ax[0][0].autoscale_view()
+        self.ax[1][0].relim()
+        self.ax[1][0].autoscale_view()
+                
+        self.ugraph.set_data(np.flip(np.flip(self.solver.u.to_numpy().transpose()), axis=1))
+        self.ugraph.autoscale()                
+        self.vgraph.set_data(np.flip(np.flip(self.solver.v.to_numpy().transpose()), axis=1))
+        self.vgraph.autoscale()
+        self.uprof.set_ydata(self.solver.u.to_numpy()[26,1:51])
+        self.vprof.set_ydata(self.solver.v.to_numpy()[1:51,26])                
+        self.fig.canvas.draw()
+        self.fig.canvas.flush_events()
 
     def dump_field(self, step, msg): # Save u,v,p at step to csv files
         for name,val in {'u':self.solver.u, 'v':self.solver.v, 'p':self.solver.p, \
