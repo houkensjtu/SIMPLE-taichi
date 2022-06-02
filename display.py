@@ -1,4 +1,5 @@
 import taichi as ti
+import numpy as np
 
 @ti.data_oriented
 class Display:
@@ -52,24 +53,32 @@ class Display:
             self.gui.show(filename)
 
     def matplt_display_init(self):
-        # Matplotlib live plotting
-        import numpy as np
-        import matplotlib.pyplot as plt
-        #plt.style.use('_mpl-gallery-nogrid')
-        plt.ion()
-            
-        fig, ax = plt.subplots(2,2)
-        x = []
-        y1 = []
-        y2 = []
-        line1, = ax[0][0].plot(x,y1)
-        line2, = ax[1][0].plot(x,y2)
-        ax[0][0].set_xlabel('Iteration')
-        ax[0][0].set_ylabel('Momentum residual')
-        ax[1][0].set_xlabel('Iteration')
-        ax[1][0].set_ylabel('Continuity residual')                                    
-        ax[0][0].grid()
-        ax[1][0].grid()            
-
-    def matplt_display_init(self):
         pass
+
+    def dump_field(self, step, msg): # Save u,v,p at step to csv files
+        for name,val in {'u':self.solver.u, 'v':self.solver.v, 'p':self.solver.p, \
+                         'mdiv':self.solver.mdiv, 'pcor':self.solver.pcor}.items():
+            np.savetxt(f'log/{step:06}-{name}-{msg}.csv', val.to_numpy(), delimiter=',')
+
+    def dump_coef(self, step, msg):
+        np.savetxt(f'log/{step:06}-apu-{msg}.csv', self.coef_u.to_numpy()[:,:,0], delimiter=',')
+        np.savetxt(f'log/{step:06}-awu-{msg}.csv', self.coef_u.to_numpy()[:,:,1], delimiter=',')
+        np.savetxt(f'log/{step:06}-aeu-{msg}.csv', self.coef_u.to_numpy()[:,:,2], delimiter=',')
+        np.savetxt(f'log/{step:06}-anu-{msg}.csv', self.coef_u.to_numpy()[:,:,3], delimiter=',')
+        np.savetxt(f'log/{step:06}-asu-{msg}.csv', self.coef_u.to_numpy()[:,:,4], delimiter=',')
+        np.savetxt(f'log/{step:06}-bu -{msg}.csv', self.b_u.to_numpy(),           delimiter=',')
+        
+        np.savetxt(f'log/{step:06}-apv-{msg}.csv', self.coef_v.to_numpy()[:,:,0], delimiter=',')
+        np.savetxt(f'log/{step:06}-awv-{msg}.csv', self.coef_v.to_numpy()[:,:,1], delimiter=',')
+        np.savetxt(f'log/{step:06}-aev-{msg}.csv', self.coef_v.to_numpy()[:,:,2], delimiter=',')
+        np.savetxt(f'log/{step:06}-anv-{msg}.csv', self.coef_v.to_numpy()[:,:,3], delimiter=',')
+        np.savetxt(f'log/{step:06}-asv-{msg}.csv', self.coef_v.to_numpy()[:,:,4], delimiter=',')        
+        np.savetxt(f'log/{step:06}-bv -{msg}.csv', self.b_v.to_numpy(),           delimiter=',')
+
+        np.savetxt(f'log/{step:06}-app-{msg}.csv', self.coef_p.to_numpy()[:,:,0], delimiter=',')
+        np.savetxt(f'log/{step:06}-awp-{msg}.csv', self.coef_p.to_numpy()[:,:,1], delimiter=',')
+        np.savetxt(f'log/{step:06}-aep-{msg}.csv', self.coef_p.to_numpy()[:,:,2], delimiter=',')
+        np.savetxt(f'log/{step:06}-anp-{msg}.csv', self.coef_p.to_numpy()[:,:,3], delimiter=',')
+        np.savetxt(f'log/{step:06}-asp-{msg}.csv', self.coef_p.to_numpy()[:,:,4], delimiter=',')        
+        np.savetxt(f'log/{step:06}-bp -{msg}.csv', self.b_p.to_numpy(),           delimiter=',')        
+    
