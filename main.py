@@ -17,7 +17,7 @@ class SIMPLESolver:
         self.dy = self.ly / self.ny
         self.rho= 1.00
         self.mu = 0.01
-        self.dt = 1e12
+        self.dt = 1e16
         
         self.alpha_p = 0.1
         self.alpha_u = 0.8
@@ -87,6 +87,7 @@ class SIMPLESolver:
     def compute_mdiv(self) -> ti.f64:
         nx, ny, dx, dy, rho = self.nx, self.ny, self.dx, self.dy, self.rho
         max_mdiv = 0.0
+        ti.loop_config(serialize=True)
         for i,j in ti.ndrange((1,nx+1),(1,ny+1)):  # [1,nx], [1,ny]
             self.mdiv[i,j] = rho * (self.u[i,j] - self.u[i+1,j]) * dy + rho * (self.v[i,j] - self.v[i,j+1]) * dx
             if ti.abs(self.mdiv[i,j]) > max_mdiv:
@@ -186,6 +187,7 @@ class SIMPLESolver:
         nx, ny, dx, dy = self.nx, self.ny, self.dx, self.dy
         max_udiff = 0.0
         max_vdiff = 0.0
+        ti.loop_config(serialize=True)        
         for i,j in ti.ndrange((2,nx+1),(1,ny+1)):
             if ti.abs(self.u_mid[i,j] - self.u[i,j]) > max_udiff:
                 max_udiff = ti.abs(self.u_mid[i,j] - self.u[i,j])
