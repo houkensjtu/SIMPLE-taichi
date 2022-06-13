@@ -7,12 +7,12 @@ class Display:
         self.solver = SIMPLESolver
         self.nx = self.solver.nx
         self.ny = self.solver.ny
-        self.real = self.solver.real
-        self.udisp = ti.field(dtype=self.solver.real, shape=((self.nx+2), (self.ny+2)))
-        self.vdisp = ti.field(dtype=self.solver.real, shape=((self.nx+2), (self.ny+2)))
-        self.pdisp = ti.field(dtype=self.solver.real, shape=((self.nx+2), (self.ny+2)))
-        self.pcordisp = ti.field(dtype=self.solver.real, shape=((self.nx+2), (self.ny+2)))
-        self.mdivdisp = ti.field(dtype=self.solver.real, shape=((self.nx+2), (self.ny+2)))
+
+        self.udisp = ti.field(dtype=float, shape=((self.nx+2), (self.ny+2)))
+        self.vdisp = ti.field(dtype=float, shape=((self.nx+2), (self.ny+2)))
+        self.pdisp = ti.field(dtype=float, shape=((self.nx+2), (self.ny+2)))
+        self.pcordisp = ti.field(dtype=float, shape=((self.nx+2), (self.ny+2)))
+        self.mdivdisp = ti.field(dtype=float, shape=((self.nx+2), (self.ny+2)))
         self.gui = ti.GUI("SIMPLESolver", ((self.nx+2),5*(self.ny+2)))        
 
     @ti.func

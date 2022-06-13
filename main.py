@@ -18,34 +18,33 @@ class SIMPLESolver:
         self.rho= 1.00
         self.mu = 0.01
         self.dt = 1e12
-        self.real = ti.f64
         
         self.alpha_p = 0.1
         self.alpha_u = 0.8
         self.alpha_m = 0.05
         
-        self.u  = ti.field(dtype=self.real, shape=(nx+3, ny+2))
-        self.v  = ti.field(dtype=self.real, shape=(nx+2, ny+3))
+        self.u  = ti.field(dtype=float, shape=(nx+3, ny+2))
+        self.v  = ti.field(dtype=float, shape=(nx+2, ny+3))
         
-        self.u_mid  = ti.field(dtype=self.real, shape=(nx+3, ny+2))
-        self.v_mid  = ti.field(dtype=self.real, shape=(nx+2, ny+3))
+        self.u_mid  = ti.field(dtype=float, shape=(nx+3, ny+2))
+        self.v_mid  = ti.field(dtype=float, shape=(nx+2, ny+3))
         
-        self.u0 = ti.field(dtype=self.real, shape=(nx+3, ny+2)) # Previous time step
-        self.v0 = ti.field(dtype=self.real, shape=(nx+2, ny+3))
+        self.u0 = ti.field(dtype=float, shape=(nx+3, ny+2)) # Previous time step
+        self.v0 = ti.field(dtype=float, shape=(nx+2, ny+3))
         
-        self.p  = ti.field(dtype=self.real, shape=(nx+2, ny+2))
-        self.pcor = ti.field(dtype=self.real, shape=(nx+2, ny+2))
-        self.pcor_mid = ti.field(dtype=self.real, shape=(nx+2, ny+2))        
-        self.mdiv = ti.field(dtype=self.real, shape=(nx+2, ny+2))                
+        self.p  = ti.field(dtype=float, shape=(nx+2, ny+2))
+        self.pcor = ti.field(dtype=float, shape=(nx+2, ny+2))
+        self.pcor_mid = ti.field(dtype=float, shape=(nx+2, ny+2))        
+        self.mdiv = ti.field(dtype=float, shape=(nx+2, ny+2))                
         self.bc = {'w': [0.0, 0.0], 'e': [0.0, 0.0], 'n': [0.0, 0.0], 's': [0.0, 0.0] }
-        self.ct = ti.field(dtype=self.real, shape=(nx+2, ny+2))   # Cell type
+        self.ct = ti.field(dtype=float, shape=(nx+2, ny+2))   # Cell type
 
-        self.coef_u = ti.field(dtype=self.real, shape=(nx+3, ny+2, 5))
-        self.b_u    = ti.field(dtype=self.real, shape=(nx+3, ny+2))           
-        self.coef_v = ti.field(dtype=self.real, shape=(nx+2, ny+3, 5))
-        self.b_v    = ti.field(dtype=self.real, shape=(nx+2, ny+3))           
-        self.coef_p = ti.field(dtype=self.real, shape=(nx+2, ny+2, 5))
-        self.b_p    = ti.field(dtype=self.real, shape=(nx+2, ny+2))        
+        self.coef_u = ti.field(dtype=float, shape=(nx+3, ny+2, 5))
+        self.b_u    = ti.field(dtype=float, shape=(nx+3, ny+2))           
+        self.coef_v = ti.field(dtype=float, shape=(nx+2, ny+3, 5))
+        self.b_v    = ti.field(dtype=float, shape=(nx+2, ny+3))           
+        self.coef_p = ti.field(dtype=float, shape=(nx+2, ny+2, 5))
+        self.b_p    = ti.field(dtype=float, shape=(nx+2, ny+2))        
         
         self.disp = Display(self)
 
