@@ -35,8 +35,8 @@ class Display:
             self.pdisp[i,j] = self.solver.p[i,j]
             self.pcordisp[i,j] = self.solver.pcor[i,j]
             self.mdivdisp[i,j] = self.solver.mdiv[i,j]            
-        self.scale_field(self.udisp)
-        self.scale_field(self.vdisp)
+        #self.scale_field(self.udisp)
+        #self.scale_field(self.vdisp)
         self.scale_field(self.pdisp)
         self.scale_field(self.pcordisp)
         self.scale_field(self.mdivdisp)        
@@ -69,10 +69,17 @@ class Display:
         self.ax[1][0].set_ylabel('Continuity residual')                                    
         self.ax[0][0].grid()
         self.ax[1][0].grid()
-            
-        self.ugraph = self.ax[0][2].imshow(self.solver.u.to_numpy())
+
+        self.post_process_field()
+        # self.vx, self.vy = self.udisp.shape
+        self.vx = np.arange(0, 52, 1)
+        self.vy = np.arange(0, 52, 1)
+        self.VX, self.VY = np.meshgrid(self.vx, self.vy)
+        self.ugraph = self.ax[0][2].imshow(self.udisp.to_numpy())
+        self.uvecp  = self.ax[0][2].quiver(self.VX, self.VY, self.udisp.to_numpy(),self.vdisp.to_numpy())
+        
         self.ax[0][2].set_xlabel('U Velocity')
-        self.vgraph = self.ax[1][2].imshow(self.solver.v.to_numpy())
+        self.vgraph = self.ax[1][2].imshow(self.vdisp.to_numpy())
         self.ax[1][2].set_xlabel('V Velocity')
 
         y_ref, u_ref = np.loadtxt('data/ghia1982.dat', unpack=True, skiprows=2, usecols=(0, 1))
@@ -107,10 +114,17 @@ class Display:
         self.ax[0][0].autoscale_view()
         self.ax[1][0].relim()
         self.ax[1][0].autoscale_view()
-                
-        self.ugraph.set_data(np.flip(np.flip(self.solver.u.to_numpy().transpose()), axis=1))
+
+        self.post_process_field()
+        self.ax[0][2].cla()
+        u = np.flip((np.flip(self.udisp.to_numpy().transpose())), axis=1)
+        v = np.flip((np.flip(self.vdisp.to_numpy().transpose())), axis=1)
+        self.ax[0][2].imshow(u)
+        # self.ugraph.set_data(np.flip(np.flip(self.udisp.to_numpy().transpose()), axis=1))
+        #self.ax[0][2].quiver(self.VX, self.VY, np.flip(np.flip(self.udisp.to_numpy().transpose())),np.flip(np.flip(self.vdisp.to_numpy().transpose())))
+        self.ax[0][2].quiver(self.VX, self.VY, u, v)
         self.ugraph.autoscale()                
-        self.vgraph.set_data(np.flip(np.flip(self.solver.v.to_numpy().transpose()), axis=1))
+        self.vgraph.set_data(v)
         self.vgraph.autoscale()
         self.uprof.set_ydata(self.solver.u.to_numpy()[26,1:51])
         self.vprof.set_ydata(self.solver.v.to_numpy()[1:51,26])                
